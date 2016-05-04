@@ -1,0 +1,6 @@
+name = Time Zone Converter
+description = Time Zone Converter for TUI.
+core = 7.x
+package = TUI.
+scripts[] = js/datetimepicker_css.js
+scripts[] = js/time-zone-converter.js

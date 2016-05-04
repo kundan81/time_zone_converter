@@ -1,0 +1,220 @@
+<?php
+
+  /**
+   * @file
+   * Implements hook_menu().
+   */
+  function time_zone_converter_menu() {
+    $items = array();
+    $items['travel-tool/time-zone'] = array( 
+      'title' => 'Time Zone Converter', //page title
+      'description' => 'A Time Zone Converter from timezonedb with TUI.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('time_zone_converter_form'), //put the name of the form here
+      'access callback' => TRUE
+    );
+    return $items;
+  }
+
+  /**
+   * Returns the render array for the form.
+   */
+  function time_zone_converter_form($form, &$form_state) {
+    $continents_with_place = load_continents_csv_file();    
+    foreach ($continents_with_place as $key => $value) {
+      $continents_with_place_value = explode("/", $value);
+      $place_without_continents[] = end($continents_with_place_value);
+    }
+    $form['location_from_header_title'] = array(
+      '#prefix' => '<div class="travel-tool-clock"><div class="feedback-field-wrapper"><div class="time-zone-left">',
+      '#markup' => '<h2>Places to convert from</h2>',
+    );
+    $location_from = $form['location_from'] = array(
+      // '#markup' => '<div class = "time-difference-header-title">Place to convert from</div>',
+      '#type' => 'select',
+      //'#prefix' => '<div class="travel-tool-clock"><div class="feedback-field-wrapper"><div class="time-zone-left">',
+      '#title' => 'Location:',
+      '#options' => $place_without_continents,
+    );
+
+    $selected_date = $form['selected_date'] = array(
+     '#type' => 'textfield', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
+     '#title' => t('Select Date'),
+     '#size' => 25,
+     '#maxlength' => 25,
+     '#default_value' => date('d-M-Y H:i:s'),
+     '#attributes' => array(
+        'id' => 'select-date-time',
+        'onclick' => 'javascript:NewCssCal("select-date-time", "ddMMMyyyy", "dropdown", true, 24, true, "future")',
+        
+      ),
+     '#suffix' => '</div>',
+    );
+
+    $form['location_to_header_title'] = array(
+      '#prefix' => '<div class = "time-zone-right">',
+      '#markup' => '<h2>Places to convert to</h2>',
+    );
+    $location_to = $form['location_to'] = array(
+      //'#prefix' => '<div class="time-zone-right">',
+      '#type' => 'select',
+      '#title' => 'Location:',
+      '#options' => $place_without_continents,
+      '#suffix' => '</div></div>',
+    );
+
+    $form['submit_button'] = array(
+      '#type' => 'submit',
+      '#value' => t('CONVERT TIME'),
+      '#suffix' => '</div>',
+    );
+
+    /**
+     * Implements Time Difference.
+     */
+      if ((!empty($location_to)) && (!empty($location_from))) {
+      $csv = load_continents_csv_file();
+      //print_r($csv); die();
+      $location_from = '';
+      $location_to = '';
+      if (isset($form_state['values']['location_from'])) {
+       $location_from = $csv[$form_state['values']['location_from']];
+       $location_from_timestamp = find_timestamp_json($location_from);
+       $location_from_timestamp = $location_from_timestamp['timestamp'];
+      }
+      if (isset($form_state['values']['location_to'])) {
+       $location_to = $csv[$form_state['values']['location_to']];
+       $location_to_timestamp = find_timestamp_json($location_to);
+       $location_to_timestamp = $location_to_timestamp['timestamp'];
+      }      
+      if ((!empty($form_state['values']['location_to'])) && (!empty($form_state['values']['location_to']))) {
+        $selected_date = '';
+        if (isset($form_state['values']['selected_date'])) {
+          $selected_date = $form_state['values']['selected_date'];
+        }
+        $time_difference = $location_to_timestamp - $location_from_timestamp;
+        if ($location_to_timestamp >= $location_from_timestamp) {
+          if (empty($selected_date)) {
+           $selected_date = human_readable_from_timestamp($location_from_timestamp);
+          }
+        }
+        else {
+          if (empty($selected_date)) {
+           $selected_date = human_readable_from_timestamp($location_from_timestamp);
+          }
+        }      
+        $date = date_create($selected_date);
+        $result = date_modify($date,  $time_difference . ' seconds');
+        $result = date_format($date, 'H:i:s');
+        $_SESSION['result'] = $result;
+        if (!empty($selected_date)) {
+          $_SESSION['result'] = "Converted time is : " . '<span>' . $_SESSION['result'] . '</span>' . " hrs";
+          $form['submission_time_difference'] = array(
+            '#markup' => '<div class = "time-difference">' . $_SESSION['result'] . '</div>',
+          );
+        }      
+        else {
+          form_set_error('error', t('Could Not Convert.'));
+        }
+      }
+    }
+    else {
+      form_set_error('error', t('Could Not Convert.'));
+    }
+    return $form;    
+  }  
+  
+  /**
+   * Implements Submition of this form.
+   */
+  function time_zone_converter_form_submit($form, &$form_state) {
+    $form_state['rebuild'] = TRUE;    
+  }
+
+  /**
+   * Implements Validation of this form.
+   */
+  function time_zone_converter_form_validate($form, &$form_state) {
+    if ((empty($form_state['values']['location_to'])) || (empty($form_state['values']['location_from']))) {
+      form_set_error('error', t('Enter Location Name First.'));
+    }
+    if ($form_state['values']['location_to'] == $form_state['values']['location_from']) {
+      form_set_error('error', t('Could Not Convert.'));
+    }
+  }
+
+  /**
+   * Implements Loading of file.
+   */
+  function load_continents_csv_file() {
+    $path = drupal_get_path('module', 'time_zone_converter') . '/file/zone.csv';
+    $csv = explode("\n", file_get_contents($path));
+
+    foreach ($csv as $key => $line) {
+      $csv[$key] = str_getcsv($line);
+      //print_r($csv[$key]); die();
+    }
+    foreach ($csv as $key => $value) {
+      if (isset($value[2]) && !empty($value[2])) {
+        $continents_with_place[] = $value['2'];
+      }
+    }
+    return $continents_with_place;    
+  }
+
+  /**
+  * Implements API.
+  */
+  function find_timestamp_json($location='') {
+    $url = 'http://api.timezonedb.com/';
+    $data = array(
+    'zone' => $location,
+      'format' => 'json',
+      'key' => 'I9490RICFQC5',
+    );
+    $full_url = url($url, array('query' => $data));
+    $std_object_url = drupal_http_request($full_url);
+    if ($std_object_url->code == 200) {
+      $data_json = drupal_json_decode($std_object_url->data);
+      return $data_json;
+    }
+    else {
+      form_set_error('city', t('Try again after some time.'));
+    }
+  }
+  
+  /**
+   * Implements hook_block_info().
+   */
+  function time_zone_converter_block_info() {
+    $time_zone_converter_block_info_block = array();
+  
+    $time_zone_converter_block_info_block['world_clock'] = array(
+      'info' => t('World Clock'),
+    );
+    return $time_zone_converter_block_info_block;
+  }
+
+  /**
+   * Implements hook_block_view().
+   */
+  function time_zone_converter_block_view($delta = '') {
+    $time_zone_converter_block_view_block = array();
+    switch ($delta) {
+      case 'world_clock':
+      $time_zone_converter_block_view_block['subject'] = '';
+      $render_time_zone_converter_form = drupal_get_form('time_zone_converter_form', arg(1));
+      $time_zone_converter_block_view_block['content'] = drupal_render($render_time_zone_converter_form);
+      break;
+    }
+    return $time_zone_converter_block_view_block;
+  }
+
+  /**
+   * Implements human_readable_from_timestamp().
+   * This function return date & time in human readable format.
+   */
+  function human_readable_from_timestamp($unix_time_stamp) {
+    $ts = $unix_time_stamp;
+    return gmdate("Y-m-d H:i:s", $ts);
+  }
