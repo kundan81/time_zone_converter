@@ -1,10 +1,12 @@
 /**
  * @file
- * The theme system, which controls the output of Drupal.
  *
- * The theme system allows for nearly all output of the Drupal system to be
- * customized by user themes.
+ * This js file restricting user to not enter date & time directly.
+ * User can change date & time with the help of pop up window. 
+ * Pop window will be open when user click on Date time input field.
+ *
  */
+ 
 (function ($) {
 	$(document).ready(function() {
 		$('#select-date-time').on('keydown',function(e) { 

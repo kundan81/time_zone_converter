@@ -1,23 +1,25 @@
 /**
  * @file
- * The theme system, which controls the output of Drupal.
  *
- * The theme system allows for nearly all output of the Drupal system to be
- * customized by user themes.
+ * This is date time picker js file.
+ * this js file contain js and css code both to handle date and time.
  */
-//Javasript name: My Date Time Picker
-//Date created: 16-Nov-2003 23:19
-//Creator: TengYong Ng
-//Website: http://www.rainforestnet.com
-//Copyright (c) 2003 TengYong Ng
-//FileName: DateTimePicker_css.js
-//Version: 2.2.4
-// Note: Permission given to use and modify this script in ANY kind of applications if
-//       header lines are left unchanged.
-//Permission is granted to redistribute and modify this javascript under a FreeBSD License.
-//New Css style version added by Yvan Lavoie (Québec, Canada) 29-Jan-2009
-//Formatted for JSLint compatibility by Labsmedia.com (30-Dec-2010)
 
+ /**
+  * Javasript name: Time Zone Converter
+  * Date created: 16-Nov-2003 23:19
+  * Creator: TengYong Ng
+  * Website: http://www.rainforestnet.com
+  * Copyright (c) 2003 TengYong Ng
+  * FileName: DateTimePicker_css.js
+  * Version: 2.2.4
+  * Note: Permission given to use and modify this script in ANY kind of applications if
+  * header lines are left unchanged.
+  * Permission is granted to redistribute and modify this javascript under a FreeBSD License.
+  * New Css style version added by Yvan Lavoie (Québec, Canada) 29-Jan-2009
+  * Formatted for JSLint compatibility by Labsmedia.com (30-Dec-2010)
+  *
+  */
 
 //Global variables
 
@@ -139,8 +141,8 @@ Calendar.prototype.GetMonthIndex = function (shortMonthName)
 };
 
 Calendar.prototype.IncYear = function () {
-    if (Cal.Year <= dtToday.getFullYear()+EndYear)
-	    Cal.Year += 1;
+  if (Cal.Year <= dtToday.getFullYear()+EndYear)
+    Cal.Year += 1;
 };
 
 Calendar.prototype.DecYear = function () {
