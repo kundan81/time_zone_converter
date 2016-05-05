@@ -1,3 +1,10 @@
+/**
+ * @file
+ * The theme system, which controls the output of Drupal.
+ *
+ * The theme system allows for nearly all output of the Drupal system to be
+ * customized by user themes.
+ */
 //Javasript name: My Date Time Picker
 //Date created: 16-Nov-2003 23:19
 //Creator: TengYong Ng

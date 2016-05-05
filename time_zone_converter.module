@@ -7,10 +7,10 @@
   function time_zone_converter_menu() {
     $items = array();
     $items['travel-tool/time-zone'] = array( 
-      'title' => 'Time Zone Converter', //page title
+      'title' => 'Time Zone Converter',
       'description' => 'A Time Zone Converter from timezonedb with TUI.',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('time_zone_converter_form'), //put the name of the form here
+      'page arguments' => array('time_zone_converter_form'),
       'access callback' => TRUE
     );
     return $items;
@@ -26,13 +26,15 @@
       $place_without_continents[] = end($continents_with_place_value);
     }
     $form['location_from_header_title'] = array(
-      '#prefix' => '<div class="travel-tool-clock"><div class="feedback-field-wrapper"><div class="time-zone-left">',
+      '#prefix' => '<div class="travel-tool-clock"><div class="feedback-field-wrapper">
+        <div class="time-zone-left">',
       '#markup' => '<h2>Places to convert from</h2>',
     );
     $location_from = $form['location_from'] = array(
       // '#markup' => '<div class = "time-difference-header-title">Place to convert from</div>',
       '#type' => 'select',
-      //'#prefix' => '<div class="travel-tool-clock"><div class="feedback-field-wrapper"><div class="time-zone-left">',
+      //'#prefix' => '<div class="travel-tool-clock"><div class="feedback-field-wrapper">
+      //<div class="time-zone-left">',
       '#title' => 'Location:',
       '#options' => $place_without_continents,
     );
@@ -74,7 +76,6 @@
      */
       if ((!empty($location_to)) && (!empty($location_from))) {
       $csv = load_continents_csv_file();
-      //print_r($csv); die();
       $location_from = '';
       $location_to = '';
       if (isset($form_state['values']['location_from'])) {
@@ -147,12 +148,11 @@
    * Implements Loading of file.
    */
   function load_continents_csv_file() {
-    $path = drupal_get_path('module', 'time_zone_converter') . '/file/zone.csv';
+    $path = drupal_get_path('module', 'time_zone_converter') . '/file/location-zone.csv';
     $csv = explode("\n", file_get_contents($path));
 
     foreach ($csv as $key => $line) {
       $csv[$key] = str_getcsv($line);
-      //print_r($csv[$key]); die();
     }
     foreach ($csv as $key => $value) {
       if (isset($value[2]) && !empty($value[2])) {
@@ -163,12 +163,16 @@
   }
 
   /**
-  * Implements API.
-  */
+   * Implements API.
+   */
   function find_timestamp_json($location='') {
+    $location_without_colon_value = explode(":", $location);
+    $location_without_slash_value = explode("/", $location_without_colon_value[0]);
+    $zone_location = $location_without_slash_value[0] . '/' . $location_without_colon_value[1];
+    $zone_location = preg_replace('/\s+/', '', $zone_location);
     $url = 'http://api.timezonedb.com/';
     $data = array(
-    'zone' => $location,
+    'zone' => $zone_location,
       'format' => 'json',
       'key' => 'I9490RICFQC5',
     );
