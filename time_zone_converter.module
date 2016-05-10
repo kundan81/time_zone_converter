@@ -109,7 +109,7 @@
         $result = date_format($date, 'H:i:s');
         $_SESSION['result'] = $result;
         if (!empty($selected_date)) {
-          $_SESSION['result'] = "Converted time is : " . '<span>' . $_SESSION['result'] . '</span>' . " hrs";
+          $_SESSION['result'] = '<h1>' . "Converted time is : " . '<span>' . $_SESSION['result'] . '</span>' . " hrs" . '</h1>';
           $form['submission_time_difference'] = array(
             '#markup' => '<div class = "time-difference">' . $_SESSION['result'] . '</div>',
           );
@@ -164,11 +164,29 @@
 
   /**
    * Implements API.
+   *
+   * Variable $kentucky_place is only used for two place
+   * which is America/Kentucky/Louisville & America/Kentucky/Monticello.
+   * Why is this so, because finding data using api only two index of 
+   * array{ [0] & [1] } is required in all place but in these two place which 
+   * i mentioned avobe array index [2] is required also.
+   *
+   * Kentucky is the name of place.  
    */
   function find_timestamp_json($location='') {
+  	$kentucky_place = '';
     $location_without_colon_value = explode(":", $location);
     $location_without_slash_value = explode("/", $location_without_colon_value[0]);
-    $zone_location = $location_without_slash_value[0] . '/' . $location_without_colon_value[1];
+    if (!empty($location_without_colon_value[2])) {
+    	if (strcmp($location_without_colon_value[1], "Kentucky")) {
+    		$kentucky_place = $location_without_colon_value[2];
+    	}
+    	$zone_location = $location_without_slash_value[0] . '/' . 
+    	 $location_without_colon_value[1] . '/' . $kentucky_place;
+    }
+    else {
+    	$zone_location = $location_without_slash_value[0] . '/' . $location_without_colon_value[1];
+    }    
     $zone_location = preg_replace('/\s+/', '', $zone_location);
     $url = 'http://api.timezonedb.com/';
     $data = array(
@@ -177,6 +195,7 @@
       'key' => 'I9490RICFQC5',
     );
     $full_url = url($url, array('query' => $data));
+    //print_r($full_url); die();
     $std_object_url = drupal_http_request($full_url);
     if ($std_object_url->code == 200) {
       $data_json = drupal_json_decode($std_object_url->data);
