@@ -168,18 +168,14 @@
   function find_timestamp_json($location='') {
   	$place = '';
     $location_without_colon_value = explode(":", $location);
-    print_r($location_without_colon_value);
     $location_without_slash_value = explode("/", $location_without_colon_value[0]);
-    print_r($location_without_slash_value);
     if (!empty($location_without_colon_value[2])) {
     	$place = $location_without_colon_value[2];
     	$zone_location = $location_without_slash_value[0] . '/' . 
-    	 $location_without_colon_value[1] . '/' . $place;
-    	 print_r($zone_location);
+    	$location_without_colon_value[1] . '/' . $place;
     }
     else {
     	$zone_location = $location_without_slash_value[0] . '/' . $location_without_colon_value[1];
-    	print_r($zone_location);
     }    
     $zone_location = preg_replace('/\s+/', '', $zone_location);
     $url = 'http://api.timezonedb.com/';
@@ -189,7 +185,6 @@
       'key' => 'I9490RICFQC5',
     );
     $full_url = url($url, array('query' => $data));
-    print_r($full_url); die();
     $std_object_url = drupal_http_request($full_url);
     if ($std_object_url->code == 200) {
       $data_json = drupal_json_decode($std_object_url->data);
