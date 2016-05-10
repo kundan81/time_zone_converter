@@ -163,29 +163,23 @@
   }
 
   /**
-   * Implements API.
-   *
-   * Variable $kentucky_place is only used for two place
-   * which is America/Kentucky/Louisville & America/Kentucky/Monticello.
-   * Why is this so, because finding data using api only two index of 
-   * array{ [0] & [1] } is required in all place but in these two place which 
-   * i mentioned avobe array index [2] is required also.
-   *
-   * Kentucky is the name of place.  
+   * Implements API.  
    */
   function find_timestamp_json($location='') {
-  	$kentucky_place = '';
+  	$place = '';
     $location_without_colon_value = explode(":", $location);
+    print_r($location_without_colon_value);
     $location_without_slash_value = explode("/", $location_without_colon_value[0]);
+    print_r($location_without_slash_value);
     if (!empty($location_without_colon_value[2])) {
-    	if (strcmp($location_without_colon_value[1], "Kentucky")) {
-    		$kentucky_place = $location_without_colon_value[2];
-    	}
+    	$place = $location_without_colon_value[2];
     	$zone_location = $location_without_slash_value[0] . '/' . 
-    	 $location_without_colon_value[1] . '/' . $kentucky_place;
+    	 $location_without_colon_value[1] . '/' . $place;
+    	 print_r($zone_location);
     }
     else {
     	$zone_location = $location_without_slash_value[0] . '/' . $location_without_colon_value[1];
+    	print_r($zone_location);
     }    
     $zone_location = preg_replace('/\s+/', '', $zone_location);
     $url = 'http://api.timezonedb.com/';
@@ -195,7 +189,7 @@
       'key' => 'I9490RICFQC5',
     );
     $full_url = url($url, array('query' => $data));
-    //print_r($full_url); die();
+    print_r($full_url); die();
     $std_object_url = drupal_http_request($full_url);
     if ($std_object_url->code == 200) {
       $data_json = drupal_json_decode($std_object_url->data);
